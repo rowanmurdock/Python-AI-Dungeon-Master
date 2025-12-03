@@ -14,12 +14,12 @@ PLAYER_STATE = {
     'health': 100,
     'inventory': [],
     'class': "None",
-    'current_location' : "None"
+    'current_location' : "A green plain in Moru"
 }
 
 def build_system_instruction():
     return f"""
-You are the game master for a fantasy text adventure.
+You are the game master for a fantasy text adventure. Keep responses clear and concise, at most two paragraphs.
 
 PLAYER_STATE:
     name = {PLAYER_STATE['name']}
@@ -48,6 +48,8 @@ a mountainous region called Borok, which is home to stout dwarves and dangerous 
 region called Hotaru, where there are many different wild and dangerous creatures, and many old ruins, and many magical plants, an ancient magic rests here - a wide green 
 plains area called Gull, where the humans reside and build massive castles - and finally a desolate desert calle Rune, home to massive creatures and plants, but very dangerous, one
 massive city lies in the center of Rune, which is a massive trading hub.
+When writing dialogue for NPC or any characters, do not always make them kind to the player. Some NPCs and characters should be hostile and rude to the player. The game should not be super easy.
+Do not always just agree with the player, and make the player complete simple "tasks" by typing solutions into the input. 
 Finally, keep a dark fantasy tone and speak like a medieval story teller. 
 """
 
@@ -144,6 +146,8 @@ def submit_action():
             if updated:
                 PLAYER_STATE = updated
 
+            print(PLAYER_STATE)
+
             response_text = f"\n\nGame Master: " + resp.split("---")[0].strip()
 
     
@@ -163,14 +167,12 @@ def start_game_prompt():
 app = Tk()
 app.geometry("1000x600")
 app.title("AI Adventure")
-story_text = Text(app, wrap=tk.WORD, background="#d1b462", foreground="#111024", font=("Jacquard 12", 16))
+story_text = Text(app, wrap=tk.WORD, background="#d1b462", foreground="#111024", font=("Jacquard 24", 24))
 
 input_frame = tk.Frame(app, height=60)
 
 
-
-
-entry_input = tk.Entry(input_frame, font=("Jacquard 12", 16))
+entry_input = tk.Entry(input_frame, font=("Jacquard 24", 20))
 entry_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) 
 
 app.rowconfigure(0, weight=1)
@@ -184,11 +186,13 @@ submit_button = tk.Button(
     input_frame, 
     text="Submit Command", 
     command=submit_action, 
-    bg="#3498db", 
+    bg="#5f6361", 
     fg="white", 
-    activebackground="#2980b9",
-    relief=tk.FLAT
+    activebackground="#3f4241",
+    relief=tk.FLAT,
+    font=("Jacquard 24", 16)
 )
+
 submit_button.pack(side=tk.RIGHT)
 
 start_game_prompt()
