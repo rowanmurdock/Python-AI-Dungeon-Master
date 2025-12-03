@@ -110,7 +110,7 @@ def submit_action():
         case 2:
             PLAYER_STATE['name'] = action
             game_setup = 1
-            response_text = f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. Are you a vagabond, warrior, or spellcaster?"
+            response_text = f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. Ther are many paths in Brukk. Are you a lonely vagabond, a brave warrior, or a mysterious spellcaster?"
         case 1:
             chosen_class = action.lower()
         
@@ -138,6 +138,25 @@ def submit_action():
                     f"vagabond, warrior, or spellcaster."
                 )
         case _:
+            if PLAYER_STATE['health'] == 0:
+                game_setup = 2
+                PLAYER_STATE = {
+                'name': "Adventurer",
+                'health': 100,
+                'inventory': [],
+                'class': "None",
+                'current_location': "A green plain in Moru"
+                }
+                chat = client.chats.create(
+                model="gemini-2.5-flash",
+                config=types.GenerateContentConfig(
+                system_instruction=build_system_instruction()
+                )
+                )
+                response_text = f"\n\nGame Master: You have met death in {PLAYER_STATE['current_location'].lower()}. You can now create a new character and try again. Enter a new name:"
+                story_text.insert(tk.END, response_text)
+                return 
+
             ai_response = chat.send_message(action)
 
             resp = ai_response.text if hasattr(ai_response, "text") else str(ai_response)
@@ -145,16 +164,14 @@ def submit_action():
             updated = extract_player_state(resp)
             if updated:
                 PLAYER_STATE = updated
+                health_label.config(text=f"Health: {PLAYER_STATE['health']}")
+
 
             print(PLAYER_STATE)
 
             response_text = f"\n\nGame Master: " + resp.split("---")[0].strip()
 
-    
     story_text.see(tk.END)
-            
-        
-    
 
     story_text.insert(tk.END, response_text)
     
@@ -165,8 +182,23 @@ def start_game_prompt():
     story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...\n")
 
 app = Tk()
-app.geometry("1000x600")
+app.state("zoomed")
 app.title("AI Adventure")
+app.configure(bg="#46a3a6")
+
+top_bar = tk.Frame(app, bg="#3d8b8e", height=40)
+top_bar.grid(row=0, column=0, sticky="ew")
+app.rowconfigure(0, weight=0)
+
+health_label = tk.Label(
+    top_bar,
+    text=f"Health: {PLAYER_STATE['health']}",
+    bg="#3d8b8e",
+    fg="white",
+    font=("Jacquard 24", 18)
+)
+health_label.pack(side=tk.RIGHT, padx=10)
+
 story_text = Text(app, wrap=tk.WORD, background="#d1b462", foreground="#111024", font=("Jacquard 24", 24))
 
 input_frame = tk.Frame(app, height=60)
@@ -175,12 +207,27 @@ input_frame = tk.Frame(app, height=60)
 entry_input = tk.Entry(input_frame, font=("Jacquard 24", 20))
 entry_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) 
 
-app.rowconfigure(0, weight=1)
-app.rowconfigure(1, weight=0)
+story_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=(10,5))
+input_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(0,10))
+
+app.rowconfigure(1, weight=1)
+app.rowconfigure(2, weight=0)
 app.columnconfigure(0, weight=1)
 
-story_text.grid(row=0, column=0, sticky="nsew", padx=10, pady=(10,5))
-input_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0,10))
+def show_inventory():
+    story_text.insert(tk.END, f"\n\nI currently have {', '.join(PLAYER_STATE['inventory']) or 'nothing.'}")
+    story_text.see(tk.END)
+
+inventory_button = tk.Button(
+    top_bar,
+    text="Inventory",
+    command=show_inventory,
+    bg="#3d8b8e",
+    fg="white",
+    relief=tk.FLAT,
+    font=("Jacquard 24", 18)
+)
+inventory_button.pack(side=tk.LEFT, padx=10, pady=5)
 
 submit_button = tk.Button(
     input_frame, 
@@ -194,6 +241,9 @@ submit_button = tk.Button(
 )
 
 submit_button.pack(side=tk.RIGHT)
+
+app.bind("<Return>", lambda event: submit_action())
+app.bind("<Tab>", lambda event: show_inventory())
 
 start_game_prompt()
 app.mainloop()
