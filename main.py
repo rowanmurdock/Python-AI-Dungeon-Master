@@ -126,7 +126,7 @@ def submit_action():
         case 2:
             PLAYER_STATE['name'] = action[0].upper()+action[1:]
             game_setup = 1
-            response_text = f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. Ther are many paths in Brukk. Are you a lonely vagabond, a brave warrior, or a mysterious spellcaster?"
+            response_text = f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. There are many paths in Brukk. Are you a lonely vagabond, a brave warrior, or a mysterious spellcaster?"
         case 1:
             chosen_class = action.lower()
         
