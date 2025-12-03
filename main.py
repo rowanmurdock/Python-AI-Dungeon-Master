@@ -43,6 +43,11 @@ PLAYER_STATE =
     'current_location' : "None"
 
     This dictionary should not always stay the same, if the player goes to a new location, update the location. If the player gets an item, add it to the inventory list, but do not just give them whatever item the ask for. If a player loses health, update their health.
+This fantasy world is called Brukk, and the world has 5 main regions: a riverland called Moru, full of water villages and kind fish people, who live a peaceful life farming plant vegetables - 
+a mountainous region called Borok, which is home to stout dwarves and dangerous goblins, who are in an eternal war - a dense, magical jungle
+region called Hotaru, where there are many different wild and dangerous creatures, and many old ruins, and many magical plants, an ancient magic rests here - a wide green 
+plains area called Gull, where the humans reside and build massive castles - and finally a desolate desert calle Rune, home to massive creatures and plants, but very dangerous, one
+massive city lies in the center of Rune, which is a massive trading hub.
 Finally, keep a dark fantasy tone and speak like a medieval story teller. 
 """
 
@@ -103,7 +108,7 @@ def submit_action():
         case 2:
             PLAYER_STATE['name'] = action
             game_setup = 1
-            response_text = f"\n\nAh, I understand. Your name is {PLAYER_STATE['name']}. Are you a vagabond, warrior, or spellcaster?"
+            response_text = f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. Are you a vagabond, warrior, or spellcaster?"
         case 1:
             chosen_class = action.lower()
         
@@ -120,14 +125,14 @@ def submit_action():
                 
                 game_setup = 0                
                 response_text = (
-                    f"\n\nYou are a {PLAYER_STATE['class']}! "
+                    f"\n\nGame Master: You are a {PLAYER_STATE['class']}! "
                     f"Your starting items are: {', '.join(PLAYER_STATE['inventory'])}. "
-                    f"Your adventure begins now in the Whispering Forest. What do you do?"
+                    f"Your adventure begins now in the riverlands of Moru. What do you do?"
                 )
 
             else:
                 response_text = (
-                    f"\n\nI do not recognize that path. Please choose a valid class: "
+                    f"\n\nGame Master: I do not recognize that path. Please choose a valid class: "
                     f"vagabond, warrior, or spellcaster."
                 )
         case _:
@@ -153,20 +158,27 @@ def submit_action():
 
 def start_game_prompt():
     """Sets the initial text and command for the user."""
-    story_text.insert(tk.END, "Welcome to the AI Adventure! The Game Master requires your details. To begin, please enter your name...\n")
+    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...\n")
 
 app = Tk()
 app.geometry("1000x600")
 app.title("AI Adventure")
-story_text = Text(app, width=18,wrap=tk.WORD, background="#000000", foreground="#177300")
-story_text.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+story_text = Text(app, wrap=tk.WORD, background="#d1b462", foreground="#111024", font=("Jacquard 12", 16))
 
-input_frame = tk.Frame(app)
-input_frame.pack(padx=10, pady=(0, 10), fill=tk.X)
+input_frame = tk.Frame(app, height=60)
 
 
-entry_input = tk.Entry(input_frame, font=('Arial', 12))
+
+
+entry_input = tk.Entry(input_frame, font=("Jacquard 12", 16))
 entry_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5)) 
+
+app.rowconfigure(0, weight=1)
+app.rowconfigure(1, weight=0)
+app.columnconfigure(0, weight=1)
+
+story_text.grid(row=0, column=0, sticky="nsew", padx=10, pady=(10,5))
+input_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=(0,10))
 
 submit_button = tk.Button(
     input_frame, 
