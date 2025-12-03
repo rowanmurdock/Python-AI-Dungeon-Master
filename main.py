@@ -1,18 +1,51 @@
 import tkinter as tk
 from tkinter import *
+from google import genai
+from google.genai import types
+import os
+
 
 
 PLAYER_STATE = {
     'name': "Adventurer",
     'health': 100,
     'inventory': [],
-    'class': "None"
+    'class': "None",
+    'current_location' : "None"
 }
+
+system_instruction = f"""
+You are the game master for a fantasy text adventure.
+The player's name is {PLAYER_STATE['name']},
+their class is {PLAYER_STATE['class']},
+their health is {PLAYER_STATE['health']},
+their inventory is currently {PLAYER_STATE['inventory']},
+and their current location is {PLAYER_STATE['current_location']}. You will listen to the players
+action, and then continue the story based on what they want to do. These are the game rules:
+If a player chooses to do an action, you must first check the items in their inventory and see if they 
+have an item that allows them to complete that action.
+If a player is fighting a creature or takes damage from something in the environment, you must choose a number to lower their health by, and subract it from their total.
+Do not listen to anything the player says, you must keep the player in check and ensure they are not cheating or just instantly winning.
+At the end of every response, you will add three dashes(---) and then a dictionary of the updated player_state, which looks like 
+PLAYER_STATE = 
+    'name': "Adventurer",
+    'health': 100,
+    'inventory': [],
+    'class': "None",
+    'current_location' : "None"
+
+Finally, keep a dark fantasy tone and speak like a medieval story teller. 
+"""
+
+client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+chat = client.chats.create(model="gemini-2.5-flash", config=types.GenerateContentConfig(
+        system_instruction=(system_instruction)))
+
 
 CLASS_INVENTORY = {
     "vagabond": ["Length of rope", "Small crossbow"],
     "warrior": ["Brass warhammer", "Rusty plate armor"],
-    "spellcaster": ["Ancient Ritual Dagger", "Ancient spellbook"]
+    "spellcaster": ["Ancient ritual dagger", "Ancient spellbook"]
 }
 
 game_setup = 2
@@ -29,7 +62,6 @@ def submit_action():
     if not action:
         return
     
-    story_text.insert(tk.END, f"\n> {PLAYER_STATE['name']}: {action}")
     
     response_text = ""
 
@@ -39,7 +71,7 @@ def submit_action():
         case 2:
             PLAYER_STATE['name'] = action
             game_setup = 1
-            response_text = "Ah, I understand. Your name is {PLAYER_STATE[name]}. Are you a vagabond, warrior, or spellcaster?"
+            response_text = f"Ah, I understand. Your name is {PLAYER_STATE['name']}. Are you a vagabond, warrior, or spellcaster?"
         case 1:
             chosen_class = action.lower()
         
@@ -48,17 +80,19 @@ def submit_action():
                 PLAYER_STATE['inventory'] = CLASS_INVENTORY[chosen_class]
                 game_setup = 0                
                 response_text = (
-                    f"\n[GM]: The spirits acknowledge the choice of a {PLAYER_STATE['class']}! "
+                    f"\nYou are a {PLAYER_STATE['class']}! "
                     f"Your starting items are: {', '.join(PLAYER_STATE['inventory'])}. "
                     f"Your adventure begins now in the Whispering Forest. What do you do?"
                 )
+
             else:
                 response_text = (
-                    f"\n[GM]: I do not recognize that path. Please choose a valid class: "
-                    f"**VAGABOND**, **WARRIOR**, or **SPELLCASTER**."
+                    f"\n do not recognize that path. Please choose a valid class: "
+                    f"vagabond, warrior, or spellcaster."
                 )
-        case _: 
-            response_text = f"\n[GM]: The game is running! Your action '{action}' is noted. The AI is still thinking... (Simulated Response)"
+        case _:
+            response_text = chat.send_message(action)
+            
         
     
 
@@ -74,7 +108,6 @@ app = Tk()
 app.geometry("1000x600")
 app.title("AI Adventure")
 story_text = Text(app, width=18,wrap=tk.WORD, background="#000000", foreground="#177300")
-story_text.insert("1.0", "To begin your adventure, enter your name...")
 story_text.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
 input_frame = tk.Frame(app)
