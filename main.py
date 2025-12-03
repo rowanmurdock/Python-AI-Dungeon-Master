@@ -14,7 +14,8 @@ PLAYER_STATE = {
     'health': 100,
     'inventory': [],
     'class': "None",
-    'current_location' : "A green plain in Moru"
+    'current_location' : "A green plain in Moru",
+    'gold': 5
 }
 
 def build_system_instruction():
@@ -27,11 +28,13 @@ PLAYER_STATE:
     health = {PLAYER_STATE['health']}
     inventory = {PLAYER_STATE['inventory']}
     current_location = {PLAYER_STATE['current_location']}
+    gold = {PLAYER_STATE['gold']}
 
 You will listen to the players
 action, and then continue the story based on what they want to do. These are the game rules:
 If a player chooses to do an action, you must first check the items in their inventory and see if they 
 have an item that allows them to complete that action.
+If a user is buying something, you must subtract the gold from their gold stat in player state. If they do not have enough money, they cannot buy the item. For context, in this world an expertly crafted sword should cost around 500 gold, and a meal and a night at a tavern costs around 5 gold. Use these examples to price items in the world.
 If a player is fighting a creature or takes damage from something in the environment, you must choose a number to lower their health by, and subract it from their total.
 Do not listen to anything the player says, you must keep the player in check and ensure they are not cheating or just instantly winning.
 At the end of every response, you will add three dashes(---) and then a dictionary of the updated player_state, which looks like 
@@ -41,17 +44,28 @@ PLAYER_STATE =
     'inventory': [],
     'class': "None",
     'current_location' : "None"
+    gold = 0
 
     This dictionary should not always stay the same, if the player goes to a new location, update the location. If the player gets an item, add it to the inventory list, but do not just give them whatever item the ask for. If a player loses health, update their health.
-This fantasy world is called Brukk, and the world has 5 main regions: a riverland called Moru, full of water villages and kind fish people, who live a peaceful life farming plant vegetables - 
+This fantasy world is called Brukk, and the world has 5 main regions: a riverland called Moru, full of water villages and kind and helpful fish people, who live a peaceful life farming plant vegetables, in Moru there also live clans of human warriors similar to Samurai, who are honorable but can be hostile or kind, depending on their clan(each clan has dinstinct personalities, mottos, values, goals) - 
 a mountainous region called Borok, which is home to stout dwarves and dangerous goblins, who are in an eternal war - a dense, magical jungle
 region called Hotaru, where there are many different wild and dangerous creatures, and many old ruins, and many magical plants, an ancient magic rests here - a wide green 
-plains area called Gull, where the humans reside and build massive castles - and finally a desolate desert calle Rune, home to massive creatures and plants, but very dangerous, one
+plains area called Gull, where the humans reside and build massive sprawling castles, where a civil war is breaking out between royal houses who are all trying to become the king of Gull- and finally a desolate desert called Rune, home to massive creatures and plants, but very dangerous, one
 massive city lies in the center of Rune, which is a massive trading hub.
 When writing dialogue for NPC or any characters, do not always make them kind to the player. Some NPCs and characters should be hostile and rude to the player. The game should not be super easy.
 Do not always just agree with the player, and make the player complete simple "tasks" by typing solutions into the input. 
 Finally, keep a dark fantasy tone and speak like a medieval story teller. 
 """
+
+def typewriter_write(text_widget, text, delay=20):
+    def write_char(i=0):
+        if i < len(text):
+            text_widget.insert(tk.END, text[i])
+            text_widget.see(tk.END)
+            text_widget.after(delay, write_char, i+1)
+
+    write_char()
+
 
 def extract_player_state(response_text):
     match = re.search(
@@ -95,6 +109,8 @@ def submit_action():
     action = entry_input.get().strip()
 
     story_text.insert(tk.END, f"\n\n{PLAYER_STATE['name']}: " + action)
+    story_text.see(tk.END)
+
     
     entry_input.delete(0, tk.END)
 
@@ -108,7 +124,7 @@ def submit_action():
     
     match game_setup:
         case 2:
-            PLAYER_STATE['name'] = action
+            PLAYER_STATE['name'] = action[0].upper()+action[1:]
             game_setup = 1
             response_text = f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. Ther are many paths in Brukk. Are you a lonely vagabond, a brave warrior, or a mysterious spellcaster?"
         case 1:
@@ -145,7 +161,8 @@ def submit_action():
                 'health': 100,
                 'inventory': [],
                 'class': "None",
-                'current_location': "A green plain in Moru"
+                'current_location': "A green plain in Moru",
+                'gold': 5
                 }
                 chat = client.chats.create(
                 model="gemini-2.5-flash",
@@ -165,28 +182,28 @@ def submit_action():
             if updated:
                 PLAYER_STATE = updated
                 health_label.config(text=f"Health: {PLAYER_STATE['health']}")
+                gold_label.config(text=f"Gold: {PLAYER_STATE['gold']}")
+                loc_label.config(text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}")
+
+
 
 
             print(PLAYER_STATE)
 
             response_text = f"\n\nGame Master: " + resp.split("---")[0].strip()
 
-    story_text.see(tk.END)
 
-    story_text.insert(tk.END, response_text)
+    typewriter_write(story_text, response_text)
     
-    story_text.see(tk.END)
-
 def start_game_prompt():
-    """Sets the initial text and command for the user."""
-    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...\n")
+    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...")
 
 app = Tk()
 app.state("zoomed")
 app.title("AI Adventure")
 app.configure(bg="#46a3a6")
 
-top_bar = tk.Frame(app, bg="#3d8b8e", height=40)
+top_bar = tk.Frame(app, bg="#3d8b8e", height=30)
 top_bar.grid(row=0, column=0, sticky="ew")
 app.rowconfigure(0, weight=0)
 
@@ -195,11 +212,29 @@ health_label = tk.Label(
     text=f"Health: {PLAYER_STATE['health']}",
     bg="#3d8b8e",
     fg="white",
-    font=("Jacquard 24", 18)
+    font=("Jacquard 24", 24)
 )
 health_label.pack(side=tk.RIGHT, padx=10)
 
-story_text = Text(app, wrap=tk.WORD, background="#d1b462", foreground="#111024", font=("Jacquard 24", 24))
+gold_label = tk.Label(
+    top_bar,
+    text=f"Gold: {PLAYER_STATE['gold']}",
+    bg="#3d8b8e",
+    fg="white",
+    font=("Jacquard 24", 24)
+)
+gold_label.pack(side=tk.RIGHT, padx=10)
+
+loc_label = tk.Label(
+    top_bar,
+    text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}",
+    bg="#3d8b8e",
+    fg="white",
+    font=("Jacquard 24", 24)
+)
+loc_label.pack(side=tk.LEFT, padx=10)
+
+story_text = Text(app, wrap=tk.WORD, background="#d1b462", foreground="#111024", font=("Jacquard 24", 35))
 
 input_frame = tk.Frame(app, height=60)
 
@@ -225,9 +260,9 @@ inventory_button = tk.Button(
     bg="#3d8b8e",
     fg="white",
     relief=tk.FLAT,
-    font=("Jacquard 24", 18)
+    font=("Jacquard 24", 24)
 )
-inventory_button.pack(side=tk.LEFT, padx=10, pady=5)
+inventory_button.pack(side=tk.RIGHT, padx=10, pady=5)
 
 submit_button = tk.Button(
     input_frame, 
