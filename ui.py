@@ -174,7 +174,17 @@ def submit_action():
             if len(PLAYER_STATE['objective']) == 0:
                 PLAYER_STATE['objective'] = goal
 
+            ##sound effects from text
+            attack_regex = re.compile(r"\b(clangs|strikes|slash|stab|strike|cut|slice|hack|thrust|pierce|cleave)\b", re.IGNORECASE)
+            water_regex = re.compile(r"\b(river|creek|lake|waterfall|pond)\b", re.IGNORECASE)
+
             response_text = "\n\nGame Master: " + raw.split("---")[0].strip()
+
+            if attack_regex.search(response_text):
+                sound.sword_noise()
+            if water_regex.search(response_text):
+                sound.river_noise()
+
 
     print(PLAYER_STATE)
     typewriter_write(story_text, response_text)
