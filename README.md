@@ -38,7 +38,9 @@ Input Commands: Type your intended action (e.g., "I walk east toward the river,"
 State Tracking: The AI handles the consequences of your actions, updates your health and inventory, and continues the story.
 
 Future features:
-- A win condition to end the game
 - More in depth world
+- Adding hunger
+- Adding time
+- Adding map
 - More specific fighting/combat gameplay
 - Saving and loading
