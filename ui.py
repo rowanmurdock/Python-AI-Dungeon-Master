@@ -1,7 +1,8 @@
 import tkinter as tk
 from ai import new_chat
-from state import PLAYER_STATE, CLASS_INVENTORY, extract_player_state, game_setup
+from state import PLAYER_STATE, CLASS_INVENTORY, WIN_CONDITIONS, extract_player_state, game_setup
 import state as state_mod
+import re
 
 story_text = None
 entry_input = None
@@ -46,33 +47,72 @@ def submit_action():
     response_text = ""
 
     match state_mod.game_setup:
-        case 2:
+        case 3:
             PLAYER_STATE['name'] = action.capitalize()
-            state_mod.game_setup = 1
+            state_mod.game_setup = 2
             response_text = (
                 f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. "
-                f"There are many paths in Brukk. Are you a vagabond, warrior, or spellcaster?"
+                f"There are many paths in Brukk. Are you a wandering vagabond, a brutal warrior, or a mystical spellcaster?"
             )
 
-        case 1:
+        case 2:
             chosen = action.lower()
 
             if chosen in CLASS_INVENTORY:
                 PLAYER_STATE['class'] = chosen.capitalize()
                 PLAYER_STATE['inventory'] = CLASS_INVENTORY[chosen]
                 chat = new_chat()
-                state_mod.game_setup = 0
+                state_mod.game_setup = 1
 
                 response_text = (
-                    f"\n\nGame Master: You are a {PLAYER_STATE['class']}! "
+                    f"\n\nGame Master: Very interesting, you are a {PLAYER_STATE['class']}! "
                     f"Your starting items are: {', '.join(PLAYER_STATE['inventory'])}. "
-                    "Your adventure begins now in the riverlands of Moru. What do you do?"
+                    f"A {PLAYER_STATE['class']} named {PLAYER_STATE['name']}. What could possibly be your goal in this world? Do you wish "
+                    "to become ruler of a realm? Perhaps find love, settle down, and make a home in this cruel realm? Or is it unimaginable wealth that you want?"
                 )
 
             else:
                 response_text = (
                     "\n\nGame Master: I do not recognize that path. Choose vagabond, warrior, or spellcaster."
                 )
+
+        case 1:
+            chosen = action.lower()
+
+            if re.search(r"\blove\b", chosen):
+                PLAYER_STATE['objective'] = WIN_CONDITIONS["Home and Hearth"]
+                state_mod.game_setup = 0
+
+            elif re.search(r"\bwealth\b", chosen):
+                PLAYER_STATE['objective'] = WIN_CONDITIONS["Dragon's Hoard"]
+                state_mod.game_setup = 0
+            elif re.search(r"\bruler\b", chosen):
+                PLAYER_STATE['objective'] = WIN_CONDITIONS["Becoming Ruler"]
+                state_mod.game_setup = 0
+
+            else:
+                response_text = (
+                    "\n\nGame Master: That is not a worthy goal. Choose ruler, love, or wealth."
+                )
+            
+            match PLAYER_STATE['objective'][0]:
+                case "Be married and own a home":
+                    response_text = (
+                    f"\n\nGame Master: A noble goal, to find love in this cold world. "
+                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0]}. Now, your journey begins in a small green plain in the riverlands of Moru."
+                )
+                case "Become King or Queen of one of the 5 realms: Moru, Borok, Gull, Hotaru, or Rune":
+                    response_text = (
+                    f"\n\nGame Master: An ambitious goal, to conquer a realm of this world. "
+                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0]}. Now, your journey begins in a small green plain in the riverlands of Moru."
+                )
+                case "Have 50,000 gold coins":
+                    response_text = (
+                    f"\n\nGame Master: A greedy goal, to gain this much wealth. "
+                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0]}. Now, your journey begins in a small green plain in the riverlands of Moru."
+                )
+            
+
 
         case _:
             if PLAYER_STATE['health'] == 0:
@@ -83,22 +123,31 @@ def submit_action():
                     'inventory': [],
                     'class': "None",
                     'current_location': "A green plain in Moru",
-                    'gold': 5
+                    'gold': 5,
+                    'objective': []
                 })
                 chat = new_chat()
                 response_text = (
-                    f"\n\nGame Master: You have met death in {PLAYER_STATE['current_location'].lower()}. "
+                    f"\n\nGame Master: You have met death in {PLAYER_STATE['current_location'][0]}.lower()+{PLAYER_STATE['current_location'][1:]}. "
                     "You can now create a new character. Enter a new name:"
                 )
                 story_text.insert(tk.END, response_text)
                 return
+            
+            if PLAYER_STATE['objective'][1] == 1:
+                response_text = (
+                    f"\n\nGame Master: You have fulfilled your ultimate objective of {PLAYER_STATE['objective'][0]}. "
+                )
+                story_text.insert(tk.END, response_text)
+                return
+
 
             ai_response = chat.send_message(action)
             raw = ai_response.text if hasattr(ai_response, "text") else str(ai_response)
 
+            
             updated = extract_player_state(raw)
             if updated:
-                PLAYER_STATE.clear()
                 PLAYER_STATE.update(updated)
 
                 health_label.config(text=f"Health: {PLAYER_STATE['health']}")
@@ -109,6 +158,7 @@ def submit_action():
 
             response_text = "\n\nGame Master: " + raw.split("---")[0].strip()
 
+    print(PLAYER_STATE)
     typewriter_write(story_text, response_text)
 
 

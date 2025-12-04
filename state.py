@@ -7,7 +7,8 @@ PLAYER_STATE = {
     'inventory': [],
     'class': "None",
     'current_location': "A green plain in Moru",
-    'gold': 5
+    'gold': 5,
+    'objective': []
 }
 
 CLASS_INVENTORY = {
@@ -16,7 +17,13 @@ CLASS_INVENTORY = {
     "spellcaster": ["Ancient ritual dagger", "Ancient spellbook"]
 }
 
-game_setup = 2
+WIN_CONDITIONS = {
+    "Home and Hearth": ["Be married and own a home", 0],
+    "Becoming Ruler": ["Become King or Queen of one of the 5 realms: Moru, Borok, Gull, Hotaru, or Rune", 0],
+    "Dragon's Hoard": ["Have 50,000 gold coins", 0]
+}
+
+game_setup = 3
 
 
 def extract_player_state(response_text):
