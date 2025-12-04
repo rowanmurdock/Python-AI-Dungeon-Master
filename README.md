@@ -13,7 +13,7 @@ A Gemini API Key (get one from Google AI Studio).
 Jacquard 12 font installed
 
 2. Set up the Environment
-The application uses the Jacquard 12 font. For the GUI to display correctly, please ensure this font is installed on your system. You can download it directly from Google Fonts.
+The application uses the MedievalSharp font. For the GUI to display correctly, please ensure this font is installed on your system. You can download it directly from Google Fonts.
 Create a new directory for your project and install the necessary library:
 pip install google-genai
 
