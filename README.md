@@ -8,25 +8,29 @@ Class Selection: Players choose a starting class (Vagabond, Warrior, or Spellcas
 
 Installation and Setup
 1. Prerequisites
-Python 3.8+
-A Gemini API Key (get one from Google AI Studio).
-Jacquard 12 font installed
+   
+  Python 3.8+
 
-2. Set up the Environment
-The application uses the MedievalSharp font. For the GUI to display correctly, please ensure this font is installed on your system. You can download it directly from Google Fonts.
+  A Gemini API Key (get one from Google AI Studio).
+
+  MedievalSharp font installed
+
+3. Set up the Environment
+   
+  The application uses the MedievalSharp font. For the GUI to display correctly, please ensure this font is installed on your system. You can download it directly from Google Fonts.
 Create a new directory for your project and install the necessary library:
 pip install google-genai
 
-3. API Key Configuration
+4. API Key Configuration
 The code relies on your API key being set as an environment variable named GOOGLE_API_KEY.
 
-On Linux/macOS:
+    -On Linux/macOS:
 export GOOGLE_API_KEY="YOUR_API_KEY_HERE"
 
-On Windows (Command Prompt):
+    -On Windows (Command Prompt):
 set GOOGLE_API_KEY="YOUR_API_KEY_HERE"
 
-4. Run the Game
+5. Run the Game
 Save your code as game.py (or similar) and run it from your terminal:
 python main.py
 
@@ -39,8 +43,12 @@ State Tracking: The AI handles the consequences of your actions, updates your he
 
 Future features:
 - More in depth world
-- Adding hunger
+- Relationships with NPC groups
+- Adding images depending on keywords
+- Adding quest log with quests NPCs have asked of you
 - Adding time
 - Adding map
+- Adding skill or experience system
 - More specific fighting/combat gameplay
 - Saving and loading
+- Menu with different AI tones/worlds to choose from
