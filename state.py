@@ -4,17 +4,18 @@ import ast
 PLAYER_STATE = {
     'name': "Adventurer",
     'health': 100,
+    'hunger':100,
     'inventory': [],
     'class': "None",
     'current_location': "A green plain in Moru",
-    'gold': 5,
+    'gold': 20,
     'objective': []
 }
 
 CLASS_INVENTORY = {
-    "vagabond": ["Length of rope", "Small crossbow"],
-    "warrior": ["Brass warhammer", "Rusty plate armor"],
-    "spellcaster": ["Ancient ritual dagger", "Ancient spellbook"]
+    "vagabond": ["Length of rope", "Small crossbow", "Short tanto", "Bread loaf (3)"],
+    "warrior": ["Brass warhammer", "Rusty plate armor", "Dried meat (5)"],
+    "spellcaster": ["Ancient ritual dagger", "Ancient spellbook", "Dried fruits", "Cured meats"]
 }
 
 WIN_CONDITIONS = {

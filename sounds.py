@@ -12,6 +12,7 @@ BREEZE_CH = pygame.mixer.Channel(5)
 STEPS_CH  = pygame.mixer.Channel(6)
 GROWL_CH = pygame.mixer.Channel(7)
 HEART_CH = pygame.mixer.Channel(8)
+BITE_CH = pygame.mixer.Channel(9)
 
 
 writing_loop = pygame.mixer.Sound("soundeffects/pen.wav")
@@ -22,6 +23,7 @@ breeze_sound = pygame.mixer.Sound("soundeffects/breeze.mp3")
 footstep_sound = pygame.mixer.Sound("soundeffects/footsteps.mp3")
 growl_sound = pygame.mixer.Sound("soundeffects/growl.mp3")
 heartbeat_sound = pygame.mixer.Sound("soundeffects/heart.mp3")
+bite_sound = pygame.mixer.Sound("soundeffects/bite.mp3")
 
 WRITING_CH.set_volume(1)
 writing_loop.set_volume(1)
@@ -63,6 +65,10 @@ def sword_noise():
 
 def growl_noise():
     GROWL_CH.play(growl_sound)
+
+def bite_noise():
+    BITE_CH.play(bite_sound)
+
 
 def breeze_noise():
     BREEZE_CH.play(breeze_sound, fade_ms=1000)

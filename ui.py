@@ -10,6 +10,7 @@ entry_input = None
 health_label = None
 gold_label = None
 loc_label = None
+hunger_label = None
 
 chat = new_chat()
 goal = None
@@ -167,6 +168,7 @@ def submit_action():
 
                 health_label.config(text=f"Health: {PLAYER_STATE['health']}")
                 gold_label.config(text=f"Gold: {PLAYER_STATE['gold']}")
+                hunger_label.config(text=f"Hunger: {PLAYER_STATE['hunger']}")
                 loc_label.config(
                     text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}"
                 )
@@ -181,6 +183,8 @@ def submit_action():
             growl_regex = re.compile(r"\b(growl|growling|snarl|snarling|rumble|rumbling|grumble|grumbling|hiss|hissing|roar|roaring)\b", re.IGNORECASE)
             footstep_regex = re.compile(r"\b(footstep|footsteps|step|steps|tread|treading|walk|walking|stomp|stomping|creep|creeping|sneak|sneaking|stride|strides|march|marching)\b", re.IGNORECASE)
             breeze_regex = re.compile(r"\b(breeze|breezy|wind|windy|gust|gusts|gusting|draft|drafty|air current|whistling wind|soft wind|gentle wind)\b", re.IGNORECASE)
+            bite_regex = re.compile(r"\b(bite|bites|biting|chew|chews|chewing|chomp|chomps|chomping|munch|munches|munching|nibble|nibbles|nibbling)\b",re.IGNORECASE)
+
 
 
 
@@ -198,6 +202,8 @@ def submit_action():
                 sound.footsteps_noise()
             if breeze_regex.search(response_text):
                 sound.breeze_noise()
+            if bite_regex.search(response_text):
+                sound.bite_noise()
 
 
     print(PLAYER_STATE)
@@ -205,7 +211,7 @@ def submit_action():
 
 
 def build_ui():
-    global story_text, entry_input, health_label, gold_label, loc_label
+    global story_text, entry_input, health_label, gold_label, loc_label, hunger_label
 
     app = tk.Tk()
     app.state("zoomed")
@@ -222,6 +228,10 @@ def build_ui():
     gold_label = tk.Label(top_bar, text=f"Gold: {PLAYER_STATE['gold']}",
                           bg="#3d8b8e", fg="white", font=("MedievalSharp", 24))
     gold_label.pack(side=tk.RIGHT, padx=10)
+
+    hunger_label = tk.Label(top_bar, text=f"Hunger: {PLAYER_STATE['hunger']}",
+                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 24))
+    hunger_label.pack(side=tk.RIGHT, padx=10)
 
     loc_label = tk.Label(top_bar,
                          text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}",
