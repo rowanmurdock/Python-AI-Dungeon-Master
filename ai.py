@@ -20,7 +20,7 @@ Use these values as the starting point for your response.
 - Class: {PLAYER_STATE['class']}
 - Health: {PLAYER_STATE['health']}
 - Inventory: {inventory_str}
-- Location: {PLAYER_STATE['current_location']}
+- Current_Location: {PLAYER_STATE['current_location']}
 - Gold: {PLAYER_STATE['gold']}
 - Objective: {objective_str}
 

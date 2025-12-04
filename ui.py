@@ -146,7 +146,7 @@ def submit_action():
                     f"\n\nGame Master: You have met death in {PLAYER_STATE['current_location'][0]}.lower()+{PLAYER_STATE['current_location'][1:]}. "
                     "You can now create a new character. Enter a new name:"
                 )
-                story_text.insert(tk.END, response_text)
+                typewriter_write(story_text, response_text)
                 return
             
             # if PLAYER_STATE['objective'][1] == 1:
@@ -171,12 +171,18 @@ def submit_action():
                     text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}"
                 )
 
-            if len(PLAYER_STATE['objective']) == 0:
+            if len(PLAYER_STATE['objective']) == 0 or PLAYER_STATE['objective'] is not goal:
                 PLAYER_STATE['objective'] = goal
 
             ##sound effects from text
             attack_regex = re.compile(r"\b(clangs|strikes|slash|stab|strike|cut|slice|hack|thrust|pierce|cleave)\b", re.IGNORECASE)
             water_regex = re.compile(r"\b(river|creek|lake|waterfall|pond)\b", re.IGNORECASE)
+            heartbeat_regex = re.compile(r"\b(heartbeat|heart beat|pulse|pulsing|thump|thudding|rhythm|heart races|heartbeat quickens|racing heart|pounding heart|pain|anxiety|anxious|stress|stressed|afraid)\b", re.IGNORECASE)
+            growl_regex = re.compile(r"\b(growl|growling|snarl|snarling|rumble|rumbling|grumble|grumbling|hiss|hissing|roar|roaring)\b", re.IGNORECASE)
+            footstep_regex = re.compile(r"\b(footstep|footsteps|step|steps|tread|treading|walk|walking|stomp|stomping|creep|creeping|sneak|sneaking|stride|strides|march|marching)\b", re.IGNORECASE)
+            breeze_regex = re.compile(r"\b(breeze|breezy|wind|windy|gust|gusts|gusting|draft|drafty|air current|whistling wind|soft wind|gentle wind)\b", re.IGNORECASE)
+
+
 
             response_text = "\n\nGame Master: " + raw.split("---")[0].strip()
 
@@ -184,6 +190,14 @@ def submit_action():
                 sound.sword_noise()
             if water_regex.search(response_text):
                 sound.river_noise()
+            if heartbeat_regex.search(response_text):
+                sound.heartbeat_noise()
+            if growl_regex.search(response_text):
+                sound.growl_noise()
+            if footstep_regex.search(response_text):
+                sound.footsteps_noise()
+            if breeze_regex.search(response_text):
+                sound.breeze_noise()
 
 
     print(PLAYER_STATE)
