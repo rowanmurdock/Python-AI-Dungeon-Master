@@ -12,6 +12,7 @@ gold_label = None
 loc_label = None
 
 chat = new_chat()
+goal = None
 
 
 
@@ -39,6 +40,7 @@ def start_game_prompt():
 
 def submit_action():
     global chat
+    global goal
 
     action = entry_input.get().strip()
     entry_input.delete(0, tk.END)
@@ -87,13 +89,18 @@ def submit_action():
             if re.search(r"\blove\b", chosen):
                 PLAYER_STATE['objective'] = WIN_CONDITIONS["Home and Hearth"]
                 state_mod.game_setup = 0
+                goal =  WIN_CONDITIONS["Home and Hearth"]
 
             elif re.search(r"\bwealth\b", chosen):
                 PLAYER_STATE['objective'] = WIN_CONDITIONS["Dragon's Hoard"]
                 state_mod.game_setup = 0
+                goal =  WIN_CONDITIONS["Dragon's Hoard"]
+
             elif re.search(r"\bruler\b", chosen):
                 PLAYER_STATE['objective'] = WIN_CONDITIONS["Becoming Ruler"]
                 state_mod.game_setup = 0
+                goal =  WIN_CONDITIONS["Becoming Ruler"]
+
 
             else:
                 response_text = (
@@ -122,6 +129,7 @@ def submit_action():
 
 
         case _:
+            
             if PLAYER_STATE['health'] == 0:
                 state_mod.game_setup = 2
                 PLAYER_STATE.update({
@@ -162,6 +170,9 @@ def submit_action():
                 loc_label.config(
                     text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}"
                 )
+
+            if len(PLAYER_STATE['objective']) == 0:
+                PLAYER_STATE['objective'] = goal
 
             response_text = "\n\nGame Master: " + raw.split("---")[0].strip()
 
