@@ -3,6 +3,7 @@ from ai import new_chat
 from state import PLAYER_STATE, CLASS_INVENTORY, WIN_CONDITIONS, extract_player_state, game_setup
 import state as state_mod
 import re
+import sounds as sound
 
 story_text = None
 entry_input = None
@@ -15,11 +16,15 @@ chat = new_chat()
 
 
 def typewriter_write(text_widget, text, delay=20):
+    sound.start_writing_noise()
     def write_char(i=0):
         if i < len(text):
             text_widget.insert(tk.END, text[i])
             text_widget.see(tk.END)
             text_widget.after(delay, write_char, i+1)
+        else:
+            sound.stop_writing_noise()
+
     write_char()
 
 
@@ -94,6 +99,8 @@ def submit_action():
                 response_text = (
                     "\n\nGame Master: That is not a worthy goal. Choose ruler, love, or wealth."
                 )
+                typewriter_write(story_text, response_text)
+                return
             
             match PLAYER_STATE['objective'][0]:
                 case "Be married and own a home":
@@ -134,12 +141,12 @@ def submit_action():
                 story_text.insert(tk.END, response_text)
                 return
             
-            if PLAYER_STATE['objective'][1] == 1:
-                response_text = (
-                    f"\n\nGame Master: You have fulfilled your ultimate objective of {PLAYER_STATE['objective'][0]}. "
-                )
-                story_text.insert(tk.END, response_text)
-                return
+            # if PLAYER_STATE['objective'][1] == 1:
+            #     response_text = (
+            #         f"\n\nGame Master: You have fulfilled your ultimate objective of {PLAYER_STATE['objective'][0]}. "
+            #     )
+            #     story_text.insert(tk.END, response_text)
+            #     return
 
 
             ai_response = chat.send_message(action)
