@@ -23,6 +23,8 @@ Use these values as the starting point for your response.
 - Inventory: {inventory_str}
 - Current_Location: {PLAYER_STATE['current_location']}
 - Gold: {PLAYER_STATE['gold']}
+- Day: {PLAYER_STATE['day']}
+- Time_Of_Day: {PLAYER_STATE['time_of_day']}
 - Objective: {objective_str}
 
 ### GLOBAL WIN CONDITIONS
@@ -47,7 +49,7 @@ Use these values as the starting point for your response.
     - If the player is doing something immediately(like talking to an NPC, shopping, looking around) you do not need to drop their hunger at all.
     -When eating a food item, it recovers some hunger, based on how big and nutritious the meal is
     -Reference: handful of berries = +10 hunger, Steak and Potatoes meal = +80 hunger, dried meat = +20 hunger
-    -A player MUST have enough food if they wish to travel far
+    -A player MUST have enough food if they wish to travel far, and if the player travels far, take one food item from their inventory per day of travel, until the player has no food left. At that point, stop travel and ask the player what they would like to do.
     -When a player eats food out of their inventory, it should leave their inventory
 6. **NPCs:** Varied personalities. Some hostile, some rude, some kind. Make their personalities and names vary wildly based on race, location, occupation, and relationship to player.
 
@@ -56,6 +58,7 @@ Use these values as the starting point for your response.
 2. **Winning:** Every turn, check if the current objective is met. Only if met, change the second value in the list from 0 to 1 (e.g., ["Goal", 1]).
 3. **Inventory:** Add items only if found/bought. Remove items if used/lost.
 4. **Health:** Update based on combat/environment.
+5. **Time:** Increment the day by how many days have passed, and change "time_of_day" depending on what time of day it is in the story. For time_of_day, 0 means morning, 1 means afternoon, 2 means evening, and 4 means night. 
 
 ### WORLD LORE (BRUKK)
 - **Moru:** Riverlands. Samurai clans (honorable but dangerous) which have different mottos and personalities. There are also peaceful fish-folk who live off the rivers bounty.
@@ -78,6 +81,8 @@ PLAYER_STATE = {{
     'class': "{PLAYER_STATE['class']}",
     'current_location': "{PLAYER_STATE['current_location']}",
     'gold': {PLAYER_STATE['gold']},
+    'day': {PLAYER_STATE['day']}
+    'time_of_day': {PLAYER_STATE['time_of_day']}
     'objective': {objective_str} 
 }}
 """

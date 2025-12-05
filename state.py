@@ -9,6 +9,8 @@ PLAYER_STATE = {
     'class': "None",
     'current_location': "A green plain in Moru",
     'gold': 20,
+    'day' : 0,
+    'time_of_day': 0,
     'objective': []
 }
 

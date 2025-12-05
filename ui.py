@@ -11,11 +11,20 @@ health_label = None
 gold_label = None
 loc_label = None
 hunger_label = None
+date_time_label = None
 
 chat = new_chat()
 goal = None
 
+game_time = ""
 
+def get_time_string(time_num):
+    match time_num:
+        case 0: return "Morning"
+        case 1: return "Afternoon"
+        case 2: return "Evening"
+        case 3: return "Night"
+        case _: return "Unknown"
 
 def typewriter_write(text_widget, text, delay=20):
     sound.start_writing_noise()
@@ -42,6 +51,7 @@ def start_game_prompt():
 def submit_action():
     global chat
     global goal
+    global game_time
 
     action = entry_input.get().strip()
     entry_input.delete(0, tk.END)
@@ -76,7 +86,7 @@ def submit_action():
                     f"\n\nGame Master: Very interesting, you are a {PLAYER_STATE['class']}! "
                     f"Your starting items are: {', '.join(PLAYER_STATE['inventory'])}. "
                     f"A {PLAYER_STATE['class']} named {PLAYER_STATE['name']}. What could possibly be your goal in this world? Do you wish "
-                    "to become ruler of a realm? Perhaps find love, settle down, and make a home in this cruel realm? Or is it unimaginable wealth that you want?"
+                    "to become ruler of a realm? Perhaps find love, settle down, and make a home in this cruel realm? Or is it unimaginable wealth that you seek?"
                 )
 
             else:
@@ -114,12 +124,12 @@ def submit_action():
                 case "Be married and own a home":
                     response_text = (
                     f"\n\nGame Master: A noble goal, to find love in this cold world. "
-                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0]}. Now, your journey begins in a small green plain in the riverlands of Moru."
+                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0].lower()}. Now, your journey begins in a small green plain in the riverlands of Moru."
                 )
                 case "Become King or Queen of one of the 5 realms: Moru, Borok, Gull, Hotaru, or Rune":
                     response_text = (
                     f"\n\nGame Master: An ambitious goal, to conquer a realm of this world. "
-                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0]}. Now, your journey begins in a small green plain in the riverlands of Moru."
+                    f"To accomplish your goal, you must {PLAYER_STATE['objective'][0].lower()}. Now, your journey begins in a small green plain in the riverlands of Moru."
                 )
                 case "Have 50,000 gold coins":
                     response_text = (
@@ -136,10 +146,13 @@ def submit_action():
                 PLAYER_STATE.update({
                     'name': "Adventurer",
                     'health': 100,
+                    'hunger': 100,
                     'inventory': [],
                     'class': "None",
                     'current_location': "A green plain in Moru",
                     'gold': 5,
+                    'day': 0,
+                    'time_of_day': 0,
                     'objective': []
                 })
                 chat = new_chat()
@@ -171,6 +184,12 @@ def submit_action():
                 hunger_label.config(text=f"Hunger: {PLAYER_STATE['hunger']}")
                 loc_label.config(
                     text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}"
+                )
+
+                current_time_str = get_time_string(PLAYER_STATE['time_of_day'])
+
+                date_time_label.config(
+                    text=f"Day {PLAYER_STATE['day']}, {current_time_str}"
                 )
 
             if len(PLAYER_STATE['objective']) == 0 or PLAYER_STATE['objective'] is not goal:
@@ -211,7 +230,9 @@ def submit_action():
 
 
 def build_ui():
-    global story_text, entry_input, health_label, gold_label, loc_label, hunger_label
+    global story_text, entry_input, health_label, gold_label, loc_label, hunger_label, date_time_label
+
+    global game_time
 
     app = tk.Tk()
     app.state("zoomed")
@@ -222,20 +243,25 @@ def build_ui():
     top_bar.grid(row=0, column=0, sticky="ew")
 
     health_label = tk.Label(top_bar, text=f"Health: {PLAYER_STATE['health']}",
-                            bg="#3d8b8e", fg="white", font=("MedievalSharp", 24))
+                            bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
     health_label.pack(side=tk.RIGHT, padx=10)
 
     gold_label = tk.Label(top_bar, text=f"Gold: {PLAYER_STATE['gold']}",
-                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 24))
+                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
     gold_label.pack(side=tk.RIGHT, padx=10)
 
     hunger_label = tk.Label(top_bar, text=f"Hunger: {PLAYER_STATE['hunger']}",
-                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 24))
+                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
     hunger_label.pack(side=tk.RIGHT, padx=10)
+
+    current_time_str = get_time_string(PLAYER_STATE['time_of_day'])
+    date_time_label = tk.Label(top_bar, text=f"Day {PLAYER_STATE['day']}, {current_time_str}",
+                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
+    date_time_label.pack(side=tk.RIGHT, padx=10)
 
     loc_label = tk.Label(top_bar,
                          text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}",
-                         bg="#3d8b8e", fg="white", font=("MedievalSharp", 24))
+                         bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
     loc_label.pack(side=tk.LEFT, padx=10)
 
     story_text = tk.Text(app, wrap=tk.WORD, background="#d1b462",
@@ -266,7 +292,7 @@ def build_ui():
         bg="#3d8b8e",
         fg="white",
         relief=tk.FLAT,
-        font=("MedievalSharp", 24)
+        font=("MedievalSharp", 16)
     )
     inventory_button.pack(side=tk.RIGHT, padx=10)
 

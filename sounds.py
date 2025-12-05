@@ -28,8 +28,8 @@ bite_sound = pygame.mixer.Sound("soundeffects/bite.mp3")
 WRITING_CH.set_volume(1)
 writing_loop.set_volume(1)
 
-music_loop.set_volume(0.3)
-MUSIC_CH.set_volume(0.3)
+music_loop.set_volume(0.2)
+MUSIC_CH.set_volume(0.2)
 
 SWORD_CH.set_volume(0.5)
 sword_sound.set_volume(0.5)
