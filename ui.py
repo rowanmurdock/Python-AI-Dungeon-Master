@@ -16,7 +16,6 @@ date_time_label = None
 chat = new_chat()
 goal = None
 
-game_time = ""
 
 def get_time_string(time_num):
     match time_num:
@@ -232,7 +231,6 @@ def submit_action():
 def build_ui():
     global story_text, entry_input, health_label, gold_label, loc_label, hunger_label, date_time_label
 
-    global game_time
 
     app = tk.Tk()
     app.state("zoomed")
