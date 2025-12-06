@@ -1,5 +1,7 @@
 import os
+from dotenv import load_dotenv
 from google import genai
+from pathlib import Path
 from google.genai import types
 from state import PLAYER_STATE, WIN_CONDITIONS
 
@@ -86,6 +88,8 @@ PLAYER_STATE = {{
     'objective': {objective_str} 
 }}
 """
+env_path = Path(__file__).parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 

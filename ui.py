@@ -233,7 +233,6 @@ def build_ui():
 
 
     app = tk.Tk()
-    app.state("zoomed")
     app.title("AI Adventure")
     app.configure(bg="#46a3a6")
 
