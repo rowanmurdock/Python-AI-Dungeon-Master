@@ -47,11 +47,9 @@ Use these values as the starting point for your response.
 5. **Hunger:**
     -100 is the maximum amount, which means the player is full and cannot eat any more.
     -0 means the player is starving, and should lose some health every turn until they eat
-    -Hunger should be decreased every turn depending on how much time has gone by, and how much energy they have used. Do not drop a players hunger too fast unless a turn takes a long time in game. 1 day in game should only drop hunger by about 20.
-    - If the player is doing something immediately(like talking to an NPC, shopping, looking around) you do not need to drop their hunger at all.
+    -Do not ever subtract hunger, the game will handle that. All you must do is determine if the player has eaten food, and add to the hunger resource based on the food they eat
     -When eating a food item, it recovers some hunger, based on how big and nutritious the meal is
     -Reference: handful of berries = +10 hunger, Steak and Potatoes meal = +80 hunger, dried meat = +40 hunger
-    -A player MUST have enough food if they wish to travel far, and if the player travels far, take one food item from their inventory per day of travel, until the player has no food left. At that point, stop travel and ask the player what they would like to do.
     -When a player eats food out of their inventory, it should leave their inventory
 6. **NPCs:** Varied personalities. Some hostile, some rude, some kind. Make their personalities and names vary wildly based on race, location, occupation, and relationship to player.
 

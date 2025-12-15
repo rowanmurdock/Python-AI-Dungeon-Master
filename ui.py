@@ -178,14 +178,30 @@ def submit_action():
             #     story_text.insert(tk.END, response_text)
             #     return
 
-
             ai_response = chat.send_message(action)
-            raw = ai_response.text if hasattr(ai_response, "text") else str(ai_response)
+            raw = ai_response.text if hasattr(ai_response, "text") else str(raw)
 
-            
+            def time_as_float(day, tod):
+                return day + [0.25, 0.5, 0.75, 1.0][tod]
+
+            old_time = time_as_float(
+                PLAYER_STATE["day"],
+                PLAYER_STATE["time_of_day"]
+            )
+
             updated = extract_player_state(raw)
             if updated:
                 PLAYER_STATE.update(updated)
+
+                new_time = time_as_float(
+                    PLAYER_STATE["day"],
+                    PLAYER_STATE["time_of_day"]
+                )
+
+                elapsed = max(0, new_time - old_time)
+
+                hunger_loss = int(elapsed * 20)
+                PLAYER_STATE["hunger"] = max(0, PLAYER_STATE["hunger"] - hunger_loss)
 
                 health_label.config(text=f"Health: {PLAYER_STATE['health']}")
                 gold_label.config(text=f"Gold: {PLAYER_STATE['gold']}")
@@ -222,7 +238,7 @@ def submit_action():
                     text=f"Day {PLAYER_STATE['day']}, {current_time_str}"
                 )
 
-            if len(PLAYER_STATE['objective']) == 0 or PLAYER_STATE['objective'] is not goal:
+            if len(PLAYER_STATE['objective']) == 0 or PLAYER_STATE['objective'] != goal:
                 PLAYER_STATE['objective'] = goal
 
             ##sound effects from text
