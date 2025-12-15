@@ -4,6 +4,8 @@ from state import PLAYER_STATE, CLASS_INVENTORY, WIN_CONDITIONS, extract_player_
 import state as state_mod
 import re
 import sounds as sound
+from PIL import Image, ImageTk
+
 
 story_text = None
 entry_input = None
@@ -12,6 +14,13 @@ gold_label = None
 loc_label = None
 hunger_label = None
 date_time_label = None
+app = None
+top_bar = None
+time_icons = {}
+time_icon_label = None
+
+
+bg_color = "#3d3a35"
 
 chat = new_chat()
 goal = None
@@ -24,6 +33,8 @@ def get_time_string(time_num):
         case 2: return "Evening"
         case 3: return "Night"
         case _: return "Unknown"
+
+
 
 def typewriter_write(text_widget, text, delay=20):
     sound.start_writing_noise()
@@ -48,9 +59,7 @@ def start_game_prompt():
 
 
 def submit_action():
-    global chat
-    global goal
-    global game_time
+    global chat, goal, game_time, bg_color, top_bar, health_label, gold_label, hunger_label, date_time_label, loc_label, time_icon_label
 
     action = entry_input.get().strip()
     entry_input.delete(0, tk.END)
@@ -187,6 +196,28 @@ def submit_action():
 
                 current_time_str = get_time_string(PLAYER_STATE['time_of_day'])
 
+                time_icon_label.configure(image=time_icons[current_time_str])
+
+
+                match get_time_string(PLAYER_STATE['time_of_day']):
+                    case "Morning":
+                        bg_color = "#F9D69E"
+                    case "Afternoon":
+                        bg_color = "#1e98bd"
+                    case "Evening": 
+                        bg_color = "#fb9062"
+                    case "Night":
+                        bg_color = "#110636"
+                    case _:
+                        bg_color = "#3d3a35"
+
+                app.configure(bg=bg_color)
+                top_bar.configure(bg=bg_color)
+                for lbl in (health_label, gold_label, hunger_label, date_time_label, loc_label, time_icon_label):
+                    lbl.configure(bg=bg_color)
+
+
+
                 date_time_label.config(
                     text=f"Day {PLAYER_STATE['day']}, {current_time_str}"
                 )
@@ -198,7 +229,7 @@ def submit_action():
             attack_regex = re.compile(r"\b(clangs|strikes|slash|stab|strike|cut|slice|hack|thrust|pierce|cleave)\b", re.IGNORECASE)
             water_regex = re.compile(r"\b(river|creek|lake|waterfall|pond)\b", re.IGNORECASE)
             heartbeat_regex = re.compile(r"\b(heartbeat|heart beat|pulse|pulsing|thump|thudding|rhythm|heart races|heartbeat quickens|racing heart|pounding heart|pain|anxiety|anxious|stress|stressed|afraid)\b", re.IGNORECASE)
-            growl_regex = re.compile(r"\b(growl|growling|snarl|snarling|rumble|rumbling|grumble|grumbling|hiss|hissing|roar|roaring)\b", re.IGNORECASE)
+            growl_regex = re.compile(r"\b(snarl|snarling|rumble|rumbling|grumble|grumbling|hiss|hissing|roar|roaring)\b", re.IGNORECASE)
             footstep_regex = re.compile(r"\b(footstep|footsteps|step|steps|tread|treading|walk|walking|stomp|stomping|creep|creeping|sneak|sneaking|stride|strides|march|marching)\b", re.IGNORECASE)
             breeze_regex = re.compile(r"\b(breeze|breezy|wind|windy|gust|gusts|gusting|draft|drafty|air current|whistling wind|soft wind|gentle wind)\b", re.IGNORECASE)
             bite_regex = re.compile(r"\b(bite|bites|biting|chew|chews|chewing|chomp|chomps|chomping|munch|munches|munching|nibble|nibbles|nibbling)\b",re.IGNORECASE)
@@ -229,36 +260,60 @@ def submit_action():
 
 
 def build_ui():
-    global story_text, entry_input, health_label, gold_label, loc_label, hunger_label, date_time_label
+    global story_text, entry_input, health_label, gold_label, loc_label, hunger_label, date_time_label, bg_color, app, top_bar, time_icon_label, time_icons
 
+
+   
 
     app = tk.Tk()
     app.title("AI Adventure")
-    app.configure(bg="#46a3a6")
+    app.configure(bg=bg_color)
 
-    top_bar = tk.Frame(app, bg="#3d8b8e", height=30)
+    time_icons = {
+        "Morning": ImageTk.PhotoImage(
+            Image.open("assets/clockmorning.png").resize((32, 32), Image.LANCZOS)
+        ),
+        "Afternoon": ImageTk.PhotoImage(
+            Image.open("assets/clock afternoon.png").resize((32, 32), Image.LANCZOS)
+        ),
+        "Evening": ImageTk.PhotoImage(
+            Image.open("assets/clockevening.png").resize((32, 32), Image.LANCZOS)
+        ),
+        "Night": ImageTk.PhotoImage(
+            Image.open("assets/clocknight.png").resize((32, 32), Image.LANCZOS)
+        ),
+    }
+
+    top_bar = tk.Frame(app, bg=bg_color, height=30)
     top_bar.grid(row=0, column=0, sticky="ew")
 
     health_label = tk.Label(top_bar, text=f"Health: {PLAYER_STATE['health']}",
-                            bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
+                            bg=top_bar.cget("bg"), fg="white", font=("MedievalSharp", 16))
     health_label.pack(side=tk.RIGHT, padx=10)
 
     gold_label = tk.Label(top_bar, text=f"Gold: {PLAYER_STATE['gold']}",
-                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
+                          bg=top_bar.cget("bg"), fg="white", font=("MedievalSharp", 16))
     gold_label.pack(side=tk.RIGHT, padx=10)
 
     hunger_label = tk.Label(top_bar, text=f"Hunger: {PLAYER_STATE['hunger']}",
-                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
+                          bg=top_bar.cget("bg"), fg="white", font=("MedievalSharp", 16))
     hunger_label.pack(side=tk.RIGHT, padx=10)
 
     current_time_str = get_time_string(PLAYER_STATE['time_of_day'])
     date_time_label = tk.Label(top_bar, text=f"Day {PLAYER_STATE['day']}, {current_time_str}",
-                          bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
+                          bg=top_bar.cget("bg"), fg="white", font=("MedievalSharp", 16))
     date_time_label.pack(side=tk.RIGHT, padx=10)
+
+    time_icon_label = tk.Label(
+    top_bar,
+    image=time_icons[get_time_string(PLAYER_STATE["time_of_day"])],
+    bg=top_bar.cget("bg")
+    )
+    time_icon_label.pack(side=tk.RIGHT, padx=(0, 4))
 
     loc_label = tk.Label(top_bar,
                          text=f"I'm at {PLAYER_STATE['current_location'][0].lower() + PLAYER_STATE['current_location'][1:]}",
-                         bg="#3d8b8e", fg="white", font=("MedievalSharp", 16))
+                         bg=top_bar.cget("bg"), fg="white", font=("MedievalSharp", 16))
     loc_label.pack(side=tk.LEFT, padx=10)
 
     story_text = tk.Text(app, wrap=tk.WORD, background="#d1b462",
@@ -286,7 +341,7 @@ def build_ui():
     inventory_button = tk.Button(
         top_bar, text="Inventory",
         command=show_inventory,
-        bg="#3d8b8e",
+        bg="#5f6361",
         fg="white",
         relief=tk.FLAT,
         font=("MedievalSharp", 16)
