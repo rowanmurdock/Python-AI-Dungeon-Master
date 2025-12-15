@@ -5,6 +5,8 @@ import state as state_mod
 import re
 import sounds as sound
 from PIL import Image, ImageTk
+import os
+import json
 
 
 story_text = None
@@ -25,6 +27,34 @@ bg_color = "#3d3a35"
 chat = new_chat()
 goal = None
 
+
+def time_as_float(day, tod):
+    return day + [0.25, 0.5, 0.75, 1.0][tod]
+
+def sound_effects_for_text(text):
+    attack_regex = re.compile(r"\b(clangs|strikes|slash|stab|strike|cut|slice|hack|thrust|pierce|cleave)\b", re.IGNORECASE)
+    water_regex = re.compile(r"\b(river|creek|lake|waterfall|pond)\b", re.IGNORECASE)
+    heartbeat_regex = re.compile(r"\b(heartbeat|heart beat|pulse|pulsing|thump|thudding|rhythm|heart races|heartbeat quickens|racing heart|pounding heart|pain|anxiety|anxious|stress|stressed|afraid)\b", re.IGNORECASE)
+    growl_regex = re.compile(r"\b(snarl|snarling|rumble|rumbling|hiss|hissing|roar|roaring)\b", re.IGNORECASE)
+    footstep_regex = re.compile(r"\b(footstep|footsteps|step|steps|tread|treading|walk|walking|stomp|stomping|creep|creeping|sneak|sneaking|stride|strides|march|marching)\b", re.IGNORECASE)
+    breeze_regex = re.compile(r"\b(breeze|breezy|wind|windy|gust|gusts|gusting|draft|drafty|air current|whistling wind|soft wind|gentle wind)\b", re.IGNORECASE)
+    bite_regex = re.compile(r"\b(bite|bites|biting|chew|chews|chewing|chomp|chomps|chomping|munch|munches|munching|nibble|nibbles|nibbling)\b",re.IGNORECASE)
+
+
+    if attack_regex.search(text):
+        sound.sword_noise()
+    if water_regex.search(text):
+        sound.river_noise()
+    if heartbeat_regex.search(text):
+        sound.heartbeat_noise()
+    if growl_regex.search(text):
+        sound.growl_noise()
+    if footstep_regex.search(text):
+        sound.footsteps_noise()
+    if breeze_regex.search(text):
+        sound.breeze_noise()
+    if bite_regex.search(text):
+        sound.bite_noise()
 
 def get_time_string(time_num):
     match time_num:
@@ -52,6 +82,41 @@ def typewriter_write(text_widget, text, delay=20):
 def show_inventory():
     story_text.insert(tk.END, f"\n\nI currently have {', '.join(PLAYER_STATE['inventory']) or 'nothing.'}")
     story_text.see(tk.END)
+
+def save_game():
+
+    ai_summary = chat.send_message("Summarize the entire player story so far, remembering relationships and quests and any other important details. Ensure recent memory is detailed so that the player can pick up where they left off. Send only a text summary that is at most 2 paragraphs. ").text
+
+
+    file_name = "saves/" + PLAYER_STATE['name'] + str(PLAYER_STATE['day']) + ".json"
+    save_data = {
+    'name': PLAYER_STATE['name'],
+    'health': PLAYER_STATE['health'],
+    'hunger': PLAYER_STATE['hunger'],
+    'inventory': PLAYER_STATE['inventory'],
+    'class': PLAYER_STATE['class'],
+    'current_location': PLAYER_STATE['current_location'],
+    'gold': PLAYER_STATE['gold'],
+    'day' : PLAYER_STATE['day'],
+    'time_of_day': PLAYER_STATE['time_of_day'],
+    'objective': PLAYER_STATE['objective'],
+    'game_history': ai_summary
+}
+
+    if not os.path.exists("saves"):
+        os.makedirs("saves")
+    try:
+        with open(file_name, 'w') as json_file:
+            json.dump(save_data, json_file, indent=4)
+
+        story_text.insert(tk.END, f"\n\nGame saved successfully as {file_name}.")
+        story_text.see(tk.END)
+
+    except Exception as e:
+        story_text.insert(tk.END, f"\n\nError saving game: {e}.")
+        story_text.see(tk.END)
+
+
 
 
 def start_game_prompt():
@@ -181,8 +246,6 @@ def submit_action():
             ai_response = chat.send_message(action)
             raw = ai_response.text if hasattr(ai_response, "text") else str(raw)
 
-            def time_as_float(day, tod):
-                return day + [0.25, 0.5, 0.75, 1.0][tod]
 
             old_time = time_as_float(
                 PLAYER_STATE["day"],
@@ -241,34 +304,8 @@ def submit_action():
             if len(PLAYER_STATE['objective']) == 0 or PLAYER_STATE['objective'] != goal:
                 PLAYER_STATE['objective'] = goal
 
-            ##sound effects from text
-            attack_regex = re.compile(r"\b(clangs|strikes|slash|stab|strike|cut|slice|hack|thrust|pierce|cleave)\b", re.IGNORECASE)
-            water_regex = re.compile(r"\b(river|creek|lake|waterfall|pond)\b", re.IGNORECASE)
-            heartbeat_regex = re.compile(r"\b(heartbeat|heart beat|pulse|pulsing|thump|thudding|rhythm|heart races|heartbeat quickens|racing heart|pounding heart|pain|anxiety|anxious|stress|stressed|afraid)\b", re.IGNORECASE)
-            growl_regex = re.compile(r"\b(snarl|snarling|rumble|rumbling|grumble|grumbling|hiss|hissing|roar|roaring)\b", re.IGNORECASE)
-            footstep_regex = re.compile(r"\b(footstep|footsteps|step|steps|tread|treading|walk|walking|stomp|stomping|creep|creeping|sneak|sneaking|stride|strides|march|marching)\b", re.IGNORECASE)
-            breeze_regex = re.compile(r"\b(breeze|breezy|wind|windy|gust|gusts|gusting|draft|drafty|air current|whistling wind|soft wind|gentle wind)\b", re.IGNORECASE)
-            bite_regex = re.compile(r"\b(bite|bites|biting|chew|chews|chewing|chomp|chomps|chomping|munch|munches|munching|nibble|nibbles|nibbling)\b",re.IGNORECASE)
-
-
-
-
             response_text = "\n\nGame Master: " + raw.split("---")[0].strip()
-
-            if attack_regex.search(response_text):
-                sound.sword_noise()
-            if water_regex.search(response_text):
-                sound.river_noise()
-            if heartbeat_regex.search(response_text):
-                sound.heartbeat_noise()
-            if growl_regex.search(response_text):
-                sound.growl_noise()
-            if footstep_regex.search(response_text):
-                sound.footsteps_noise()
-            if breeze_regex.search(response_text):
-                sound.breeze_noise()
-            if bite_regex.search(response_text):
-                sound.bite_noise()
+            sound_effects_for_text(response_text)
 
 
     print(PLAYER_STATE)
@@ -409,6 +446,16 @@ def build_game_ui():
         font=("MedievalSharp", 16)
     )
     inventory_button.pack(side=tk.RIGHT, padx=10)
+
+    menu_button = tk.Button(
+        top_bar, text="Menu",
+        command=save_game,
+        bg="#5f6361",
+        fg="white",
+        relief=tk.FLAT,
+        font=("MedievalSharp", 16)
+    )
+    menu_button.pack(side=tk.RIGHT, padx=10)
 
     app.rowconfigure(1, weight=1)
     app.columnconfigure(0, weight=1)
