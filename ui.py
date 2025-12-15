@@ -274,14 +274,60 @@ def submit_action():
     print(PLAYER_STATE)
     typewriter_write(story_text, response_text)
 
+def clear_window():
+    for widget in app.winfo_children():
+        widget.destroy()
 
-def build_ui():
+def load_game_logic():
+    print("not implemented yet")
+
+def build_main_menu():
+    global app, time_icons
+
+    if app is None:
+        app = tk.Tk()
+        app.title("AI Adventure")
+        app.geometry("1000x800")
+        
+        time_icons = {
+            "Morning": ImageTk.PhotoImage(Image.open("assets/clockmorning.png").resize((32, 32), Image.LANCZOS)),
+            "Afternoon": ImageTk.PhotoImage(Image.open("assets/clock afternoon.png").resize((32, 32), Image.LANCZOS)),
+            "Evening": ImageTk.PhotoImage(Image.open("assets/clockevening.png").resize((32, 32), Image.LANCZOS)),
+            "Night": ImageTk.PhotoImage(Image.open("assets/clocknight.png").resize((32, 32), Image.LANCZOS)),
+        }
+
+    clear_window()
+    app.configure(bg=bg_color)
+
+    menu_frame = tk.Frame(app, bg=bg_color, bd=5, relief=tk.RIDGE)
+    menu_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER, width=600, height=500)
+
+    title_label = tk.Label(menu_frame, text="Realm of Brukk", bg=bg_color, font=("MedievalSharp", 50, "bold"))
+    title_label.pack(pady=(50, 20))
+
+    subtitle_label = tk.Label(menu_frame, text="An AI Dungeon Adventure", bg=bg_color,  font=("MedievalSharp", 20))
+    subtitle_label.pack(pady=(0, 50))
+
+    # Buttons
+    new_game_btn = tk.Button(menu_frame, text="New Game", command=build_game_ui, 
+                              fg="white", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
+    new_game_btn.pack(pady=10)
+
+    load_game_btn = tk.Button(menu_frame, text="Load Game", command=load_game_logic, 
+                              fg="white", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
+    load_game_btn.pack(pady=10)
+
+    exit_btn = tk.Button(menu_frame, text="Exit", command=app.quit, 
+                         bg="#8c3b3b", fg="white", font=("MedievalSharp", 18), width=10, relief=tk.FLAT)
+    exit_btn.pack(pady=(40, 0))
+
+    return app
+
+
+def build_game_ui():
     global story_text, entry_input, health_label, gold_label, loc_label, hunger_label, date_time_label, bg_color, app, top_bar, time_icon_label, time_icons
 
-
-   
-
-    app = tk.Tk()
+    clear_window()
     app.title("AI Adventure")
     app.configure(bg=bg_color)
 
