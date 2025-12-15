@@ -1,4 +1,4 @@
-# AI Dark Fantasy Adventure 
+# PyWanderer: AI Dark Fantasy Adventure 
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Gemini API](https://img.shields.io/badge/AI-Gemini_2.5_Flash-orange)
