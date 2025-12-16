@@ -1,12 +1,13 @@
 import tkinter as tk
 from ai import new_chat
-from state import PLAYER_STATE, CLASS_INVENTORY, WIN_CONDITIONS, extract_player_state, game_setup
+from state import PLAYER_STATE, CLASS_INVENTORY, WIN_CONDITIONS, extract_player_state
 import state as state_mod
 import re
 import sounds as sound
 from PIL import Image, ImageTk
 import os
 import json
+import glob
 
 
 story_text = None
@@ -20,6 +21,8 @@ app = None
 top_bar = None
 time_icons = {}
 time_icon_label = None
+game_setup = 3
+
 
 
 bg_color = "#3d3a35"
@@ -116,31 +119,58 @@ def save_game():
         story_text.insert(tk.END, f"\n\nError saving game: {e}.")
         story_text.see(tk.END)
 
+def load_game(file_name):
+    global PLAYER_STATE, game_setup
+    try:
+        with open(file_name, 'r') as json_file:
+            load_data = json.load(json_file)
+        
+        PLAYER_STATE['name'] = load_data['name']
+        PLAYER_STATE['health'] = load_data['health']
+        PLAYER_STATE['hunger'] = load_data['hunger']
+        PLAYER_STATE['inventory'] = load_data['inventory']
+        PLAYER_STATE['class'] = load_data['class']
+        PLAYER_STATE['current_location'] = load_data['current_location']
+        PLAYER_STATE['gold'] = load_data['gold']
+        PLAYER_STATE['day'] = load_data['day']
+        PLAYER_STATE['time_of_day'] = load_data['time_of_day']
+        PLAYER_STATE['objective'] = load_data['objective']
+
+        game_setup = 0
 
 
+        load_game_start = chat.send_message(f"You are loading a currently saved game, where the player name is {PLAYER_STATE['name']} and their current location is at {PLAYER_STATE['current_location']}. Their inventory contains {PLAYER_STATE['inventory']}. This is a summary of their story:" + load_data['game_history'] + ". You will resume their story from here, starting now.").text
 
-def start_game_prompt():
-    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...")
+        load_game_start = "\n\n" + load_game_start.split("---")[0].strip()
 
+
+        build_game_ui()
+        story_text.insert(tk.END, "Game Master:" + f"Loaded {PLAYER_STATE['name']} (Day {PLAYER_STATE['day']}).\n\n{load_game_start}")
+
+    except Exception as e:
+        print("Error loading game:" + e)
+            
 
 def submit_action():
-    global chat, goal, game_time, bg_color, top_bar, health_label, gold_label, hunger_label, date_time_label, loc_label, time_icon_label
+    global chat, goal, game_time, bg_color, top_bar, health_label, gold_label, hunger_label, date_time_label, loc_label, time_icon_label, game_setup
 
     action = entry_input.get().strip()
     entry_input.delete(0, tk.END)
 
     if not action:
         return
+    
+    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...")
 
     story_text.insert(tk.END, f"\n\n{PLAYER_STATE['name']}: {action}")
     story_text.see(tk.END)
 
     response_text = ""
 
-    match state_mod.game_setup:
+    match game_setup:
         case 3:
             PLAYER_STATE['name'] = action.capitalize()
-            state_mod.game_setup = 2
+            game_setup = 2
             response_text = (
                 f"\n\nGame Master: Ah, I understand. Your name is {PLAYER_STATE['name']}. "
                 f"There are many paths in Brukk. Are you a wandering vagabond, a brutal warrior, or a mystical spellcaster?"
@@ -153,7 +183,7 @@ def submit_action():
                 PLAYER_STATE['class'] = chosen.capitalize()
                 PLAYER_STATE['inventory'] = CLASS_INVENTORY[chosen]
                 chat = new_chat()
-                state_mod.game_setup = 1
+                game_setup = 1
 
                 response_text = (
                     f"\n\nGame Master: Very interesting, you are a {PLAYER_STATE['class']}! "
@@ -172,17 +202,17 @@ def submit_action():
 
             if re.search(r"\blove\b", chosen):
                 PLAYER_STATE['objective'] = WIN_CONDITIONS["Home and Hearth"]
-                state_mod.game_setup = 0
+                game_setup = 0
                 goal =  WIN_CONDITIONS["Home and Hearth"]
 
             elif re.search(r"\bwealth\b", chosen):
                 PLAYER_STATE['objective'] = WIN_CONDITIONS["Dragon's Hoard"]
-                state_mod.game_setup = 0
+                game_setup = 0
                 goal =  WIN_CONDITIONS["Dragon's Hoard"]
 
             elif re.search(r"\bruler\b", chosen):
                 PLAYER_STATE['objective'] = WIN_CONDITIONS["Becoming Ruler"]
-                state_mod.game_setup = 0
+                game_setup = 0
                 goal =  WIN_CONDITIONS["Becoming Ruler"]
 
 
@@ -214,8 +244,8 @@ def submit_action():
 
         case _:
             
-            if PLAYER_STATE['health'] == 0:
-                state_mod.game_setup = 2
+            if PLAYER_STATE['health'] <= 0:
+                game_setup = 3
                 PLAYER_STATE.update({
                     'name': "Adventurer",
                     'health': 100,
@@ -315,8 +345,69 @@ def clear_window():
     for widget in app.winfo_children():
         widget.destroy()
 
-def load_game_logic():
-    print("not implemented yet")
+def load_game_menu():
+    global app
+    clear_window()
+    app.configure(bg=bg_color)
+
+    tk.Label(app, text="Select a Save File", bg=bg_color, fg="white", 
+             font=("MedievalSharp", 30, "bold")).pack(pady=20)
+
+    container = tk.Frame(app, bg=bg_color)
+    container.pack(fill=tk.BOTH, expand=True, padx=100, pady=10)
+
+    canvas = tk.Canvas(container, bg=bg_color, highlightthickness=0)
+    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    
+    scrollable_frame = tk.Frame(canvas, bg=bg_color)
+
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw", width=780)
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    if not os.path.exists("saves"):
+        tk.Label(scrollable_frame, text="No 'saves' folder found.", bg=bg_color, fg="white", font=("MedievalSharp", 18)).pack(pady=20)
+    else:
+        save_files = glob.glob("saves/*.json")
+        
+        if not save_files:
+            tk.Label(scrollable_frame, text="No save files found.", bg=bg_color, fg="white", font=("MedievalSharp", 18)).pack(pady=20)
+        
+        for filepath in save_files:
+            try:
+                with open(filepath, 'r') as f:
+                    data = json.load(f)
+                
+                name = data.get('name', 'Unknown')
+                day = data.get('day', 0)
+                player_class = data.get('class', 'Unknown')
+                
+                display_text = f"{name}  |  Day {day}  |  {player_class}"
+
+                btn = tk.Button(scrollable_frame, 
+                                text=display_text, 
+                                command=lambda f=filepath: load_game(f),
+                                bg="#5f6361", 
+                                fg="white", 
+                                font=("MedievalSharp", 16), 
+                                anchor="w",
+                                padx=20,
+                                relief=tk.RAISED)
+                btn.pack(fill=tk.X, pady=5, ipady=5)
+
+            except Exception as e:
+                print(f"Skipping corrupt file {filepath}: {e}")
+
+    tk.Button(app, text="Back to Main Menu", command=build_main_menu, 
+              bg="#8c3b3b", fg="white", font=("MedievalSharp", 16)).pack(pady=20)
+
 
 def build_main_menu():
     global app, time_icons
@@ -350,7 +441,7 @@ def build_main_menu():
                               fg="white", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
     new_game_btn.pack(pady=10)
 
-    load_game_btn = tk.Button(menu_frame, text="Load Game", command=load_game_logic, 
+    load_game_btn = tk.Button(menu_frame, text="Load Game", command=load_game_menu, 
                               fg="white", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
     load_game_btn.pack(pady=10)
 
@@ -463,5 +554,4 @@ def build_game_ui():
     app.bind("<Return>", lambda e: submit_action())
     app.bind("<Tab>", lambda e: show_inventory())
 
-    start_game_prompt()
     return app

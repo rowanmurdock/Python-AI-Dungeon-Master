@@ -26,8 +26,6 @@ WIN_CONDITIONS = {
     "Dragon's Hoard": ["Have 50,000 gold coins", 0]
 }
 
-game_setup = 3
-
 
 def extract_player_state(response_text):
     match = re.search(
