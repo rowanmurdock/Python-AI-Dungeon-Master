@@ -23,6 +23,8 @@ The game is set in the custom world of **Brukk** (featuring the regions of Moru,
     * Player win condition/goal
     * World time/time of day
     * Player Name
+ 
+* **Saving and Loading Games:** Ability to play through the game for a while, save it, and load it with the same stats and story to play later. All saving is done directly in the game UI and filesystem not needed.
 * **Dynamic Storytelling:** No two playthroughs are exactly the same, even if the world lore stays the same. The story unfolds organically based on your inputs within the lore of Brukk, which you can explore through multiple playthroughs.
 * **Class Selection:** Choose from three distinct starting classes, each with unique starting items:
     * **Vagabond**
@@ -89,7 +91,5 @@ The following features are planned for future updates to deepen the Brukk experi
 * Progression System: Experience points (XP) and unlockable skills.
 
 * Advanced Combat: Specific turn-based fighting mechanics and stats.
-
-* Save/Load System: Ability to save the JSON state to a local file.
 
 * Tone Selector: Menu options to change the AI's narrative style or world difficulty.
