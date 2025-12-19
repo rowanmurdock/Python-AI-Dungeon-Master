@@ -124,7 +124,18 @@ def load_game(file_name):
     try:
         with open(file_name, 'r') as json_file:
             load_data = json.load(json_file)
-        
+
+        game_setup = 0
+
+
+        load_game_start = chat.send_message(f"You are loading a currently saved game, where the player name is {PLAYER_STATE['name']} and their current location is at {PLAYER_STATE['current_location']}. Their inventory contains {PLAYER_STATE['inventory']}. This is a summary of their story:" + load_data['game_history'] + ". You will resume their story from here, starting now, do not change any of the player state until next turn.").text
+
+        load_game_start = "\n\n" + load_game_start.split("---")[0].strip()
+
+
+        build_game_ui()
+        story_text.insert(tk.END, "Game Master:" + f"Loaded {PLAYER_STATE['name']} (Day {PLAYER_STATE['day']}).\n\n{load_game_start}")
+
         PLAYER_STATE['name'] = load_data['name']
         PLAYER_STATE['health'] = load_data['health']
         PLAYER_STATE['hunger'] = load_data['hunger']
@@ -135,17 +146,6 @@ def load_game(file_name):
         PLAYER_STATE['day'] = load_data['day']
         PLAYER_STATE['time_of_day'] = load_data['time_of_day']
         PLAYER_STATE['objective'] = load_data['objective']
-
-        game_setup = 0
-
-
-        load_game_start = chat.send_message(f"You are loading a currently saved game, where the player name is {PLAYER_STATE['name']} and their current location is at {PLAYER_STATE['current_location']}. Their inventory contains {PLAYER_STATE['inventory']}. This is a summary of their story:" + load_data['game_history'] + ". You will resume their story from here, starting now.").text
-
-        load_game_start = "\n\n" + load_game_start.split("---")[0].strip()
-
-
-        build_game_ui()
-        story_text.insert(tk.END, "Game Master:" + f"Loaded {PLAYER_STATE['name']} (Day {PLAYER_STATE['day']}).\n\n{load_game_start}")
 
     except Exception as e:
         print("Error loading game:" + e)
@@ -159,8 +159,6 @@ def submit_action():
 
     if not action:
         return
-    
-    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...")
 
     story_text.insert(tk.END, f"\n\n{PLAYER_STATE['name']}: {action}")
     story_text.see(tk.END)
@@ -458,6 +456,7 @@ def build_game_ui():
     clear_window()
     app.title("AI Adventure")
     app.configure(bg=bg_color)
+    
 
     time_icons = {
         "Morning": ImageTk.PhotoImage(
@@ -553,5 +552,7 @@ def build_game_ui():
 
     app.bind("<Return>", lambda e: submit_action())
     app.bind("<Tab>", lambda e: show_inventory())
+
+    story_text.insert(tk.END, "Welcome to the realm of Brukk. To begin, please enter your name...")
 
     return app

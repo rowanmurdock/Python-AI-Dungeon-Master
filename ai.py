@@ -48,7 +48,7 @@ Use these values as the starting point for your response.
     -100 is the maximum amount, which means the player is full and cannot eat any more.
     -0 means the player is starving, and should lose some health every turn until they eat
     -Do not ever subtract hunger, the game will handle that. All you must do is determine if the player has eaten food, and add to the hunger based on the food they eat. If the player does not specifically say they want to eat food, DO NOT change hunger at all. 
-    -When eating a food item, it recovers some hunger, based on how big and nutritious the meal is
+    -Hunger is a scale of 0 (starving) to 100 (full). If the player eats, increase hunger but NEVER exceed 100.    -When eating a food item, it recovers some hunger, based on how big and nutritious the meal is
     -Reference: handful of berries = +5 hunger, Steak and Potatoes meal = +50 hunger, dried meat = +20 hunger
     -When a player eats food out of their inventory, it should leave their inventory
 6. **NPCs:** Varied personalities. Some hostile, some rude, some kind. Make their personalities and names vary wildly based on race, location, occupation, and relationship to player.
