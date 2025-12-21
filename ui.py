@@ -259,6 +259,13 @@ def submit_action():
     print(PLAYER_STATE)
     typewriter_write(story_text, response_text)
 
+
+
+def show_inventory():
+    story_text.insert(tk.END, f"\n\nI currently have {', '.join(PLAYER_STATE['inventory']) or 'nothing.'}")
+    story_text.see(tk.END)
+
+
 def clear_window():
     for widget in app.winfo_children():
         widget.destroy()
@@ -356,11 +363,11 @@ def build_main_menu():
 
     # Buttons
     new_game_btn = tk.Button(menu_frame, text="New Game", command=build_game_ui, 
-                              fg="white", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
+                              fg="black", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
     new_game_btn.pack(pady=10)
 
     load_game_btn = tk.Button(menu_frame, text="Load Game", command=load_game_menu, 
-                              fg="white", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
+                              fg="black", font=("MedievalSharp", 24), width=15, relief=tk.FLAT, activebackground="#3f4241")
     load_game_btn.pack(pady=10)
 
     exit_btn = tk.Button(menu_frame, text="Exit", command=app.quit, 

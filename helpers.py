@@ -4,6 +4,7 @@ import json
 import sounds as sound
 import tkinter as tk
 from ai import new_chat
+from state import PLAYER_STATE
 
 
 chat = new_chat()
@@ -59,10 +60,6 @@ def typewriter_write(text_widget, text, delay=20):
 
     write_char()
 
-
-def show_inventory():
-    story_text.insert(tk.END, f"\n\nI currently have {', '.join(PLAYER_STATE['inventory']) or 'nothing.'}")
-    story_text.see(tk.END)
 
 def save_game():
 
